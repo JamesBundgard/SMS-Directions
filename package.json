@@ -1,0 +1,44 @@
+{
+  "name": "sms-directions",
+  "version": "1.0.0",
+  "description": "A Node.js server that accepts text messaged addresses and responds with directions.",
+  "main": "dist/index.js",
+  "scripts": {
+    "lint": "eslint src --ext .ts",
+    "prebuild": "npm run lint",
+    "build": "tsc",
+    "prestart": "npm run build",
+    "start": "node .",
+    "dev": "tsc-watch --onSuccess \"node ./dist/index.js\"",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/JamesBundgard/SMS-Directions.git"
+  },
+  "author": "James Bundgard",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/JamesBundgard/SMS-Directions/issues"
+  },
+  "homepage": "https://github.com/JamesBundgard/SMS-Directions#readme",
+  "dependencies": {
+    "body-parser": "^1.19.0",
+    "dotenv": "^10.0.0",
+    "express": "^4.17.1",
+    "twilio": "^3.67.0"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.13",
+    "@types/node": "^16.7.1",
+    "@types/twilio": "^3.19.3",
+    "@typescript-eslint/eslint-plugin": "^4.29.2",
+    "@typescript-eslint/parser": "^4.29.2",
+    "eslint": "^7.2.0",
+    "eslint-config-airbnb-base": "^14.2.1",
+    "eslint-config-airbnb-typescript": "^13.0.0",
+    "eslint-plugin-import": "^2.22.1",
+    "tsc-watch": "^4.5.0",
+    "typescript": "^4.3.5"
+  }
+}
