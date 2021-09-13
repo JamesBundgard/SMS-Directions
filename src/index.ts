@@ -19,7 +19,9 @@ const controller = new SMSController();
 
 app.get('/', async (req, res) => { res.send('Server is live.'); });
 
-app.post('/sms', twilio.webhook(), controller.handleSMS.bind(controller));
+app.post('/sms',
+    twilio.webhook({ protocol: 'https' }),
+    controller.handleSMS.bind(controller));
 
 app.get('*', (req, res) => {
     res.status(404).send('Not found.');
