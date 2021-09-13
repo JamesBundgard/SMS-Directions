@@ -25,6 +25,8 @@ Text "helpme" or "hello" to bring up this help menu.
 Text your destination address, then follow the prompts to get directions.
 (Pro shortcut: [travel mode] to [destination] from [current location])
 
+Text "reset" to stop getting directions.
+
 Warning: please follow the EXACT formats above :) - but don't worry about upper/lower case
 `;
 

@@ -7,14 +7,17 @@ import {
 import sanitizeHtml from 'sanitize-html';
 
 export default class GoogleAPI {
-    public static async getDirections(
+    constructor(
+        private client = new Client({}),
+    ) {}
+
+    public async getDirections(
         origin: string,
         destination: string,
         mode: TravelMode,
     ): Promise<string[]> {
         try {
-            const mapsClient = new Client({});
-            const directions = await mapsClient.directions({
+            const directions = await this.client.directions({
                 params: {
                     origin,
                     destination,
@@ -35,7 +38,7 @@ export default class GoogleAPI {
 
             return formatted;
         } catch (e) {
-            return [`Error getting directions: ${JSON.stringify(e)}`];
+            return [`Error getting directions: ${JSON.stringify(e, Object.getOwnPropertyNames(e))}`];
         }
     }
 }

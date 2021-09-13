@@ -8,19 +8,24 @@ import GoogleAPI from '../web/GoogleAPI';
 export default class DirectionsService {
     constructor(
         private store = new UserStore(),
-    ) { }
+        private googleApi = new GoogleAPI(),
+    ) {}
 
-    private stringToTravelMode(msg: string): TravelMode {
+    public stringToTravelMode(msg: string): TravelMode {
         const message = msg.trim().toLowerCase();
 
-        if (['bicycling', 'bike', 'cycle', 'cycling'].includes(message)) return TravelMode.bicycling;
+        if (['bicycling', 'bike', 'cycle', 'cycling', 'biking'].includes(message)) return TravelMode.bicycling;
         if (['driving', 'drive', 'car'].includes(message)) return TravelMode.driving;
         if (['transit', 'subway', 'bus', 'public transit'].includes(message)) return TravelMode.transit;
         return TravelMode.walking;
     }
 
+    private getState(phoneNumber: string): UserState {
+        return this.store.getUserState(phoneNumber) ?? new UserState(phoneNumber);
+    }
+
     private async getDirections(state: UserState): Promise<string> {
-        const directions = await GoogleAPI.getDirections(
+        const directions = await this.googleApi.getDirections(
             state.location,
             state.destination,
             state.travelMode,
@@ -28,14 +33,17 @@ export default class DirectionsService {
         const response = directions.splice(0, 10);
         state.directions = directions;
 
+        state.destination = undefined;
+        state.location = undefined;
+        state.travelMode = undefined;
+        state.status = Status.GettingDestination;
+
         this.store.setUserState(state);
         response.push('\n...send "next" for more directions');
         return response.join('\n');
     }
 
     private providedDestination(state: UserState, msg: string): string {
-        if (msg.trim().length === 0) return `Invalid destination: ${msg}`;
-
         state.destination = msg;
         state.status = Status.GettingLocation;
         this.store.setUserState(state);
@@ -44,8 +52,6 @@ export default class DirectionsService {
     }
 
     private providedLocation(state: UserState, msg: string): string {
-        if (msg.trim().length === 0) return `Invalid location: ${msg}`;
-
         state.location = msg;
         state.status = Status.GettingTravelMode;
         this.store.setUserState(state);
@@ -54,8 +60,6 @@ export default class DirectionsService {
     }
 
     private async providedTravelMode(state: UserState, msg: string): Promise<string> {
-        if (msg.trim().length === 0) return `Invalid travel mode: ${msg}`;
-
         state.travelMode = this.stringToTravelMode(msg);
         state.status = Status.GettingDestination;
 
@@ -74,12 +78,14 @@ export default class DirectionsService {
     }
 
     public async handleUserMsg(phoneNumber: string, msg: string): Promise<string> {
-        const state: UserState = this.store.getUserState(phoneNumber) ?? new UserState(phoneNumber);
+        const state: UserState = this.getState(phoneNumber);
 
         const advancedRegex = new RegExp(/^.+ from .+ to .+$/i);
         if (advancedRegex.test(msg)) {
             return this.handleAdvancedCase(state, msg);
         }
+
+        if (msg.trim().length === 0) return `Invalid message: ${msg}`;
 
         switch (state.status) {
             case Status.GettingDestination:
@@ -94,12 +100,12 @@ export default class DirectionsService {
     }
 
     public getNextDirections(phoneNumber: string): string {
-        const state: UserState = this.store.getUserState(phoneNumber) ?? new UserState(phoneNumber);
-        const response = state.directions.splice(0, 10);
-
-        this.store.setUserState(state);
+        const state: UserState = this.getState(phoneNumber);
 
         if (state.directions.length === 0) return 'No directions left!';
+
+        const response = state.directions.splice(0, 10);
+        this.store.setUserState(state);
 
         response.push('\n...send "next" for more directions');
         return response.join('\n');
