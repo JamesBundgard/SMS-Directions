@@ -3,6 +3,7 @@
 
 import express from 'express';
 import bodyParser from 'body-parser';
+import twilio from 'twilio';
 import SMSController from './controllers/SMSController';
 
 require('dotenv').config();
@@ -18,7 +19,11 @@ const controller = new SMSController();
 
 app.get('/', async (req, res) => { res.send('Server is live.'); });
 
-app.post('/sms', controller.handleSMS.bind(controller));
+app.post('/sms', twilio.webhook(), controller.handleSMS.bind(controller));
+
+app.get('*', (req, res) => {
+    res.status(404).send('Not found.');
+});
 
 app.listen(port, () => {
     console.log(`Server started at http://localhost:${port}`);
